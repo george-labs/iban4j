@@ -25,12 +25,12 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import org.iban4j.IbanFormatException.IbanFormatViolation;
 
@@ -40,8 +40,8 @@ public class IbanUtilTest {
     @RunWith(Parameterized.class)
     public static class ValidCheckDigitCalculationTest {
 
-        private Iban iban;
-        private String expectedIbanString;
+        private final Iban iban;
+        private final String expectedIbanString;
 
         public ValidCheckDigitCalculationTest(Iban iban, String expectedIbanString) {
             this.iban = iban;
@@ -64,13 +64,13 @@ public class IbanUtilTest {
     public static class InvalidCheckDigitCalculationTest {
 
 
-        private Character invalidCharacter;
+        private final Character invalidCharacter;
 
         public InvalidCheckDigitCalculationTest(Character invalidCharacter) {
             this.invalidCharacter = invalidCharacter;
         }
 
-        @Test(expected = IllegalArgumentException.class)
+        @Test(expected = IbanFormatException.class)
         public void checkDigitCalculationWithNonNumericBbanShouldThrowException() {
 
             IbanUtil.calculateCheckDigit("AT000159260" + invalidCharacter + "076545510730339");
@@ -237,7 +237,7 @@ public class IbanUtilTest {
     @RunWith(Parameterized.class)
     public static class ValidIbanValidationTest {
 
-        private String ibanString;
+        private final String ibanString;
 
         public ValidIbanValidationTest(Iban iban, String ibanString) {
             this.ibanString = ibanString;
@@ -246,6 +246,52 @@ public class IbanUtilTest {
         @Test
         public void ibanValidationWithValidIbanShouldNotThrowException() {
             IbanUtil.validate(ibanString);
+        }
+
+        @Parameterized.Parameters
+        public static Collection<Object[]> ibanParameters() {
+            final Collection<Object[]> data = new ArrayList<Object[]>(TestDataHelper.getIbanData());
+            data.addAll(nonStandardButValidIbans());
+            return data;
+        }
+
+        private static Collection<Object[]> nonStandardButValidIbans() {
+            final Collection<Object[]> data = new ArrayList<Object[]>();
+            // adding custom validation cases.
+            // iban with 01 check digit
+            data.add(new Object[]{new Iban.Builder()
+                    .countryCode(CountryCode.TR)
+                    .bankCode("00123")
+                    .accountNumber("0882101517977799")
+                    .nationalCheckDigit("0")
+                    .build(), "TR010012300882101517977799"});
+            // iban with 98 check digit
+            data.add(new Object[]{new Iban.Builder()
+                    .countryCode(CountryCode.TR)
+                    .bankCode("00123")
+                    .accountNumber("0882101517977799")
+                    .nationalCheckDigit("0")
+                    .build(), "TR980012300882101517977799"});
+
+            return data;
+        }
+    }
+
+    @RunWith(Parameterized.class)
+    public static class IbanLengthTest {
+
+        private final Iban iban;
+        private final String expectedIbanString;
+
+        public IbanLengthTest(Iban iban, String expectedIbanString) {
+            this.iban = iban;
+            this.expectedIbanString = expectedIbanString;
+        }
+
+        @Test
+        public void getIbanLengthShouldReturnValidLength() {
+            assertThat(IbanUtil.getIbanLength(iban.getCountryCode()),
+                    is(equalTo(expectedIbanString.length())));
         }
 
         @Parameterized.Parameters

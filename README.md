@@ -54,9 +54,11 @@ A Java library for generation and validation of the International Bank Account N
 <dependency>
   <groupId>org.iban4j</groupId>
   <artifactId>iban4j</artifactId>
-  <version>2.2.1</version>
+  <version>3.0.2</version>
 </dependency>
 ```
+
+![Compatibility Badge](https://java.net/downloads/adoptopenjdk/compat.svg)
 
 #### References
 
@@ -68,3 +70,4 @@ A Java library for generation and validation of the International Bank Account N
 Copyright 2014 Artur Mkrtchyan.
 
 Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+

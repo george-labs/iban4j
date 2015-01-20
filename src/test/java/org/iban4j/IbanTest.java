@@ -34,8 +34,8 @@ public class IbanTest {
     @RunWith(Parameterized.class)
     public static class IbanGenerationTest1 {
 
-        private Iban iban;
-        private String expectedIbanString;
+        private final Iban iban;
+        private final String expectedIbanString;
 
         public IbanGenerationTest1(Iban iban, String expectedIbanString) {
             this.iban = iban;
@@ -289,6 +289,13 @@ public class IbanTest {
         public void ibanConstructionWithInvalidCheckDigitShouldThrowException() {
             Iban.valueOf("AT621904300234573201");
         }
+
+        @Test(expected = IbanFormatException.class)
+        public void ibanConstructionWithInvalidBbanCharacterShouldThrowException() {
+            Iban.valueOf("AZ21NABZ000000001370100_1944");
+        }
+
+
 
         @Test(expected = IbanFormatException.class)
         public void ibanConstructionWithoutCountryShouldThrowException() {
